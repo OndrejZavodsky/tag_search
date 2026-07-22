@@ -3,3 +3,8 @@ the app will traverse the directory tree and if the tags match the tags requeste
 the list in the cli version will be printed
 in the gui version it will display the dirrectories like the file manager
 add the option for the partial search and exclude the certain dirrectories
+
+taks:
+pass through the dirrectories
+read the tags and confirm match
+print the list of the paths
