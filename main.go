@@ -6,34 +6,34 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
-func readLinesToSet(path string) (map[string]struct{}, error) {
+func readLinesToStruct(path string) (TagSet, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return TagSet{}, err
 	}
 	defer f.Close()
 
-	set := make(map[string]struct{})
+	var tags []string
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		line := scanner.Text()
-		set[strings.ToLower(line)] = struct{}{}
+		tags = append(tags, line)
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return TagSet{}, err
 	}
-	return set, nil
+	tagSet := TagSet{Path: path, Tags: tags}
+	return tagSet, nil
 }
 
 type TagSet struct {
 	Path string
-	Tags map[string]struct{}
+	Tags []string
 }
 
-func collectTagSets(root string) ([]TagSet, error) {
+func collectTags(root string) ([]TagSet, error) {
 	var results []TagSet
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
@@ -44,22 +44,22 @@ func collectTagSets(root string) ([]TagSet, error) {
 			return nil // skip, keep walking
 		}
 
-		tags, err := readLinesToSet(path) // path is already full/correct
+		tagSet, err := readLinesToStruct(path) // path is already full/correct
 		if err != nil {
 			return err
 		}
 
-		results = append(results, TagSet{Path: path, Tags: tags})
+		results = append(results, tagSet)
 		return nil
 	})
 
 	return results, err
 }
 func main() {
-	set, err := readLinesToSet("blocklist.txt")
+	set, err := readLinesToStruct("blocklist.txt")
 	if err != nil {
 		fmt.Println("err:", err)
 		return
 	}
-	fmt.Println(len(set), "lines")
+	fmt.Println(set)
 }
