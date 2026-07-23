@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -39,12 +40,12 @@ func collectTags(root string) ([]TagSet, error) {
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
-		} //for permision denied and stuf like that
+		}
 		if d.IsDir() || d.Name() != ".tags.txt" {
-			return nil // skip, keep walking
+			return nil
 		}
 
-		tagSet, err := readLinesToStruct(path) // path is already full/correct
+		tagSet, err := readLinesToStruct(path)
 		if err != nil {
 			return err
 		}
@@ -56,10 +57,23 @@ func collectTags(root string) ([]TagSet, error) {
 	return results, err
 }
 func main() {
-	set, err := readLinesToStruct("blocklist.txt")
+	config := ParseFlags()
+	dir, err := os.Getwd()
 	if err != nil {
-		fmt.Println("err:", err)
-		return
+		log.Fatal(err)
 	}
-	fmt.Println(set)
+	targets, err := collectTags(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var filtered []TagSet
+	for _, tagSet := range targets {
+		if matchTags(tagSet, config) {
+			filtered = append(filtered, tagSet)
+		}
+	}
+	for _, ts := range filtered {
+		fmt.Println(ts.Path)
+	}
 }

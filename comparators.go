@@ -2,11 +2,11 @@ package main
 
 import "sort"
 
-func matchTags(requested []string, tagSet TagSet, cfg Config) bool {
+func matchTags(tagSet TagSet, cfg Config) bool {
 	tags := dedupe(tagSet.Tags)
 	matched := 0
 	for _, tag := range tags {
-		for _, req := range requested {
+		for _, req := range cfg.Tags {
 			if tag == req {
 				matched++
 			}
