@@ -1,8 +1,12 @@
 package main
 
-import "sort"
+import (
+	"sort"
+	"tag_search/search"
+	"tag_search/ui"
+)
 
-func matchTags(tagSet TagSet, cfg Config) bool {
+func matchTags(tagSet search.TagSet, cfg ui.Config) bool {
 	tags := dedupe(tagSet.Tags)
 	matched := 0
 	for _, tag := range tags {
